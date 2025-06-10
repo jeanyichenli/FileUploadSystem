@@ -1,5 +1,6 @@
 # FileUploadSystem
-# Distributed File Upload & Integrity Verification System
+
+### Distributed File Upload & Integrity Verification System
 
 A modular backend system for handling chunked file uploads with resumable support, cryptographic verification (SHA256 / AES-GCM), and distributed metadata tracking.
 
