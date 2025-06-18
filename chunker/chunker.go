@@ -3,15 +3,13 @@ package chunker
 import (
 	"fmt"
 	"io"
-	"os"
 
 	datastore "github.com/jeanyichenli/FileUploadSystem/datastore"
 )
 
-func SplitFile(file io.Reader, chunksize int) error {
+func SplitFile(file io.Reader, chunksize int, repoPath string) error {
 	// Define variables
 	chunkIndex := 0 // Start chunk index with 0
-	repoPath := os.Getenv("REPO")
 
 	for {
 		chunk := make([]byte, chunksize)
