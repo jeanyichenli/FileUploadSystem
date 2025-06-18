@@ -1,0 +1,4 @@
+#!/bin/bash
+export PROJECT="/Users/jean/code_practice/go_projects/FileUploadSystem"
+export REPO="${PROJECT}/repo"
+export TEST="${PROJECT}/test"
