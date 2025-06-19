@@ -1,5 +1,5 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
+Copyright © 2025 Yi-Chen (Jean) Li jean841115@gmail.com
 */
 package main
 
