@@ -8,8 +8,8 @@ import (
 )
 
 func TestSplitFile(t *testing.T) {
-	testPath := "/Users/jean/code_practice/go_projects/FileUploadSystem/test"
-	repoPath := "/Users/jean/code_practice/go_projects/FileUploadSystem/repo"
+	testPath := "../test"
+	repoPath := "../repo"
 	filepath := gopath.Join(testPath, "1M.bin")
 
 	// Open test file
