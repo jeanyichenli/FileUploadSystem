@@ -5,13 +5,17 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
 
 const (
 	filePathOptionName       = "file-path"
-	filePathShortOptionName  = "p"
+	filePathShortOptionName  = "f"
 	chunkSizeOptionName      = "chunk-size"
 	chunkSizeShortOptionName = "c"
 )
@@ -32,22 +36,50 @@ var uploadCmd = &cobra.Command{
 		fmt.Println("upload called")
 
 		// Get flags
-		filepath, err := cmd.Flags().GetString(filePathOptionName)
+		filepath, chunkSize, err := getUploadOptions(cmd)
 		if err != nil {
-			fmt.Printf("Error getting %s option: %s", filePathOptionName, err.Error())
+			fmt.Printf("Error parsing options %s, err: %s\n", filepath, err.Error())
 			return
 		}
 
-		fmt.Println("filepath:", filepath)
+		fmt.Printf("filepath: %s, chunkSize: %v\n", filepath, chunkSize)
 
-		chunkSize, err := cmd.Flags().GetString(chunkSizeOptionName)
+		// Open file
+		// TODO: Find other method to handle large file sizes like 100G.
+		file, err := os.Open(filepath)
 		if err != nil {
-			fmt.Printf("Error getting %s option: %s", chunkSizeOptionName, err.Error())
+			fmt.Printf("Error opening file %s, err: %s\n", filepath, err.Error())
+			return
+		}
+		defer file.Close()
+
+		// POST the file to mock API
+		// TODO: use another http package to separate
+		url := "http://localhost:8080/upload"
+		req, err := http.NewRequest("POST", url, nil)
+		if err != nil {
+			fmt.Printf("Error creating new request to %s, err: %s\n", url, err.Error())
 			return
 		}
 
-		fmt.Println("chunkSize:", chunkSize)
+		client := http.Client{
+			Timeout: 5 * time.Second,
+		}
 
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Printf("Error sending http request to %s, err: %s\n", url, err.Error())
+			return
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Printf("Error reading response body, err: %s\n", err.Error())
+			return
+		}
+
+		fmt.Println("Test result:", string(body))
 	},
 }
 
@@ -66,4 +98,20 @@ func init() {
 	uploadCmd.Flags().StringP(filePathOptionName, filePathShortOptionName, "", "File path to upload.")
 	uploadCmd.MarkFlagRequired(filePathOptionName)
 	uploadCmd.Flags().StringP(chunkSizeOptionName, chunkSizeShortOptionName, "256k", "Chunk size to split file. Default is 256kB.")
+}
+
+func getUploadOptions(cmd *cobra.Command) (filepath, chunkSize string, err error) {
+	filepath, err = cmd.Flags().GetString(filePathOptionName)
+	if err != nil {
+		fmt.Printf("Error getting %s option: %s", filePathOptionName, err.Error())
+		return filepath, chunkSize, err
+	}
+
+	chunkSize, err = cmd.Flags().GetString(chunkSizeOptionName)
+	if err != nil {
+		fmt.Printf("Error getting %s option: %s\n", chunkSizeOptionName, err.Error())
+		return filepath, chunkSize, err
+	}
+
+	return filepath, chunkSize, err
 }
